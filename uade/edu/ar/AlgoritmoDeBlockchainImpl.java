@@ -18,7 +18,35 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
                                                   int maxBloques) {
         List<List<Bloque>> solucion = new ArrayList<>();
         List<Bloque> blockchain = new ArrayList<>();
+        Bloque bloque = new Bloque();
         backtrackingBlockchain(transacciones, 0, solucion, );
-        return S;
+        return solucion;
+    }
+
+    private void backtrackingBlockchain(List<Transaccion> transacciones,
+                                        int indice,
+                                        List<List<Bloque>> solucion,
+                                        List<Bloque> blockchain,
+                                        Bloque bloque,
+                                        int maxTamanioBloque,
+                                        int maxValorBloque,
+                                        int maxTransacciones) {
+        if (indice == transacciones.size()) {
+            bloque.setTransacciones();
+            solucion.add(blockchain);
+            return;
+        } else {
+            for (int i = indice; i <= transacciones.size(); i++) {
+                Transaccion transaccion = transacciones.get(i);
+                if (blockchain != null) {
+                    for (int j = 0; j <= blockchain.size(); j++) {
+                        Bloque bloque = blockchain.get(j);
+                        if (noExisteTransaccionEnBloque(bloque,transaccion)) {
+                            bloque.setTransacciones(transaccion);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
