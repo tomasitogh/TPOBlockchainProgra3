@@ -11,5 +11,6 @@ public class Main {
         AlgoritmoDeBlockchain algoritmoDeBlockchain = new AlgoritmoDeBlockchainImpl();
         List<Transaccion> transacciones = TransaccionUtils.crearTransaccionesSimples(10, 100, 1000, 5);
         algoritmoDeBlockchain.construirBlockchain(transacciones,1000,10,5,5);
+
     }
 }

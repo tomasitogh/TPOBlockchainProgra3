@@ -4,6 +4,7 @@ import uade.edu.progra3.AlgoritmoDeBlockchain;
 import uade.edu.progra3.model.Bloque;
 import uade.edu.progra3.model.Transaccion;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * @author AlejandroFoglino
@@ -15,6 +16,9 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
                                                   int maxValorBloque,
                                                   int maxTransacciones,
                                                   int maxBloques) {
-        return null;
+        List<List<Bloque>> solucion = new ArrayList<>();
+        List<Bloque> blockchain = new ArrayList<>();
+        backtrackingBlockchain(transacciones, 0, solucion, );
+        return S;
     }
 }
