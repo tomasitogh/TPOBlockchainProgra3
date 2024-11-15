@@ -88,6 +88,20 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
             return false;
         }
 
+        //verificar que la transaccion  no este en otros bloques o en el mismo
+        for (Bloque bloque : BC) {
+            for (Transaccion transaccion : bloque.getTransacciones()) {
+                if (transaccion.equals(Tr)) {
+                    return false;
+                }
+            }
+        }
+        for (Transaccion t : B.getTransacciones()) {
+            if (t.equals(Tr)) {
+                return false;
+            }
+        }
+
         // Verificar el valor total del bloque
         if (B.getValorTotal() + Tr.getValor() > maxValorB) {
             return false;
