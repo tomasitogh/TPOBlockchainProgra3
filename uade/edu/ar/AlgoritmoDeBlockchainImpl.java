@@ -28,34 +28,93 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
                                         List<List<Bloque>> solucion,
                                         List<Bloque> blockchain,
                                         Bloque bloque,
+
                                         int maxTamanioBloque,
                                         int maxValorBloque,
                                         int maxTransacciones) {
         if (indice == transacciones.size()) {
-            bloque.setTransacciones();
             solucion.add(blockchain);
             return;
         } else {
-            for (int i = indice; i <= transacciones.size(); i++) {
+            for (int i = indice; i < transacciones.size(); i++) {
                 Transaccion transaccion = transacciones.get(i);
                 if (blockchain != null) {
                     for (int j = 0; j <= blockchain.size(); j++) {
-                        Bloque bloque = blockchain.get(j);
-                        if (transaccionValidaEnBloque(bloque, transaccion)) {
-                            // Supongamos que tienes una instancia de Bloque y una instancia de Transaccio
-
-                            List<Transaccion> transaccionesDeBloque = bloque.getTransacciones();
-
+                        Bloque bloqueBlockchain = blockchain.get(j);
+                        if (transaccionValidaEnBloque(blockchain, bloqueBlockchain, transaccion, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
+                            //agregamos la transaccion al bloque
+                            List<Transaccion> transaccionesDeBloque = bloqueBlockchain.getTransacciones();
                             transaccionesDeBloque.add(transaccion);
-
-                            bloque.setTamanioTotal(bloque.getTamanioTotal() + transaccion.getTamanio());
-                            bloque.setValorTotal(bloque.getValorTotal() + transaccion.getValor());
-
-                            bloque.setTransacciones(transacciones);
+                            bloqueBlockchain.setTamanioTotal(bloqueBlockchain.getTamanioTotal() + transaccion.getTamanio());
+                            bloqueBlockchain.setValorTotal(bloqueBlockchain.getValorTotal() + transaccion.getValor());
+                            bloqueBlockchain.setTransacciones(transacciones);
+                            //agregamos el bloque a la transaccion y llamamos recursivamente
+                            blockchain.add(bloque);
+                            backtrackingBlockchain(transacciones, i + 1, solucion, blockchain, bloqueBlockchain, maxTamanioBloque, maxValorBloque, maxTransacciones);
+                            //removemos la transaccion del bloque
+                            blockchain.remove(bloque);
                         }
                     }
                 }
             }
+            Bloque nuevoBloque = new Bloque();
+            Transaccion transaccion = transacciones.get(indice);
+            if (transaccionValidaEnBloque(blockchain, nuevoBloque, transaccion, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
+                List<Transaccion> transaccionesDeBloque = nuevoBloque.getTransacciones();
+                transaccionesDeBloque.add(transaccion);
+                nuevoBloque.setTamanioTotal(bloque.getTamanioTotal() + transaccion.getTamanio());
+                nuevoBloque.setValorTotal(bloque.getValorTotal() + transaccion.getValor());
+                nuevoBloque.setTransacciones(transacciones);
+                blockchain.add(nuevoBloque);
+                backtrackingBlockchain(transacciones, indice + 1, solucion, blockchain, nuevoBloque, maxTamanioBloque, maxValorBloque, maxTransacciones);
+                blockchain.remove(nuevoBloque);
+            }
         }
+    }
+    public static boolean transaccionValidaEnBloque(List<Bloque> BC,
+                                                    Bloque B,
+                                                    Transaccion Tr,
+                                                    int maxTamanioB,
+                                                    int maxValorB,
+                                                    int maxTransaccionesPorB) {
+        // Verificar el tamaño del bloque
+        if (B.getTamanioTotal() + Tr.getTamanio() > maxTamanioB) {
+            return false;
+        }
+
+        // Verificar el valor total del bloque
+        if (B.getValorTotal() + Tr.getValor() > maxValorB) {
+            return false;
+        }
+
+        // Verificar la cantidad de transacciones en el bloque
+        if (B.getTransacciones().size() + 1 > maxTransaccionesPorB) {
+            return false;
+        }
+
+        // Verificar si el valor total del bloque más el de la transacción es múltiplo de 10
+        if ((B.getValorTotal() + Tr.getValor()) % 10 != 0) {
+            return false;
+        }
+
+        // Verificar dependencia
+        if (Tr.getDependencia() != null) {
+            boolean encontrado = false;
+
+            for (Bloque bloque : BC) {
+                for (Transaccion transaccion : bloque.getTransacciones()) {
+                    if (transaccion.equals(Tr.getDependencia())) {
+                        encontrado = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!encontrado) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
