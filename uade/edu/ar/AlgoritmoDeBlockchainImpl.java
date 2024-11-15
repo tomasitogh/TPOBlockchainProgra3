@@ -62,9 +62,9 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
             if (transaccionValidaEnBloque(blockchain, nuevoBloque, transaccion, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
                 List<Transaccion> transaccionesDeBloque = nuevoBloque.getTransacciones();
                 transaccionesDeBloque.add(transaccion);
-                nuevoBloque.setTamanioTotal(bloque.getTamanioTotal() + transaccion.getTamanio());
-                nuevoBloque.setValorTotal(bloque.getValorTotal() + transaccion.getValor());
-                nuevoBloque.setTransacciones(transacciones);
+                nuevoBloque.setTamanioTotal(transaccion.getTamanio());
+                nuevoBloque.setValorTotal(transaccion.getValor());
+                nuevoBloque.setTransacciones(transaccionesDeBloque);
                 blockchain.add(nuevoBloque);
                 backtrackingBlockchain(transacciones, indice + 1, solucion, blockchain, nuevoBloque, maxTamanioBloque, maxValorBloque, maxTransacciones);
                 blockchain.remove(nuevoBloque);
@@ -115,6 +115,11 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
             }
         }
 
+        //verificar firmas
+
+        if (!Tr.isFirmada()) {
+            return false;
+        }
         return true;
     }
 }
