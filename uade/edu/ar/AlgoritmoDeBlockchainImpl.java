@@ -41,8 +41,17 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
                 if (blockchain != null) {
                     for (int j = 0; j <= blockchain.size(); j++) {
                         Bloque bloque = blockchain.get(j);
-                        if (noExisteTransaccionEnBloque(bloque,transaccion)) {
-                            bloque.setTransacciones(transaccion);
+                        if (transaccionValidaEnBloque(bloque, transaccion)) {
+                            // Supongamos que tienes una instancia de Bloque y una instancia de Transaccio
+
+                            List<Transaccion> transaccionesDeBloque = bloque.getTransacciones();
+
+                            transaccionesDeBloque.add(transaccion);
+
+                            bloque.setTamanioTotal(bloque.getTamanioTotal() + transaccion.getTamanio());
+                            bloque.setValorTotal(bloque.getValorTotal() + transaccion.getValor());
+
+                            bloque.setTransacciones(transacciones);
                         }
                     }
                 }
