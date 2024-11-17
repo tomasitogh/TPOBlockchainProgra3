@@ -33,48 +33,53 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
                                         int maxTransacciones) {
         System.out.println("Llamada recursiva con índice: " + indice + ", Blockchain actual: " + blockchain);
         for (Bloque bloque : blockchain) {
-            System.out.println("  Bloque:");
+            System.out.println("  Bloque:" + bloque);
             for (Transaccion transaccion : bloque.getTransacciones()) {
                 System.out.println("    Transacción: " + transaccion);
             }
         }
         if (indice == transacciones.size()) {
-            System.out.println("Fin de las transacciones. Solución válida encontrada: " + blockchain);
-            solucion.add(new ArrayList<>(blockchain));
-            return;
+            if (validarBlockchain(blockchain, transacciones)) {
+
+                System.out.println("Fin de las transacciones. Solución válida encontrada: " + blockchain);
+                solucion.add(new ArrayList<>(copiarBlockchain(blockchain)));
+                return;
+            } else {
+                return;
+            }
         }
 
-    for (int i = indice; i < transacciones.size(); i++) {
-        System.out.println("Índice i: " + i);
-        Transaccion transaccion = transacciones.get(i);
         if (!blockchain.isEmpty()) {
             for (int j = 0; j < blockchain.size(); j++) {
                 System.out.println("Índice j: " + j);
                 Bloque bloqueBlockchain = blockchain.get(j);
+                for (int i = indice; i < transacciones.size(); i++) {
+                    System.out.println("Índice i: " + i);
+                    Transaccion transaccion = transacciones.get(i);
+                    if (transaccionValidaEnBloque(blockchain, bloqueBlockchain, transaccion, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
+                        System.out.println("Agregando transacción " + transaccion + " al bloque existente " + bloqueBlockchain);
+                        List<Transaccion> transaccionesDeBloque = bloqueBlockchain.getTransacciones();
+                        transaccionesDeBloque.add(transaccion);
+                        System.out.println("Cambiando tamaño y valor del bloque " + bloqueBlockchain);
+                        bloqueBlockchain.setTamanioTotal(bloqueBlockchain.getTamanioTotal() + transaccion.getTamanio());
+                        bloqueBlockchain.setValorTotal(bloqueBlockchain.getValorTotal() + transaccion.getValor());
+                        bloqueBlockchain.setTransacciones(transaccionesDeBloque);
 
-                if (transaccionValidaEnBloque(blockchain, bloqueBlockchain, transaccion, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
-                    System.out.println("Agregando transacción " + transaccion + " al bloque existente " + bloqueBlockchain);
-                    List<Transaccion> transaccionesDeBloque = bloqueBlockchain.getTransacciones();
-                    transaccionesDeBloque.add(transaccion);
-                    System.out.println("Cambiando tamaño y valor del bloque " + bloqueBlockchain);
-                    bloqueBlockchain.setTamanioTotal(bloqueBlockchain.getTamanioTotal() + transaccion.getTamanio());
-                    bloqueBlockchain.setValorTotal(bloqueBlockchain.getValorTotal() + transaccion.getValor());
-                    bloqueBlockchain.setTransacciones(transaccionesDeBloque);
+                        backtrackingBlockchain(transacciones, i + 1, solucion, blockchain, maxTamanioBloque, maxValorBloque, maxTransacciones);
 
-                    backtrackingBlockchain(transacciones, i + 1, solucion, blockchain, maxTamanioBloque, maxValorBloque, maxTransacciones);
-
-                    bloqueBlockchain.setTamanioTotal(bloqueBlockchain.getTamanioTotal() - transaccion.getTamanio());
-                    bloqueBlockchain.setValorTotal(bloqueBlockchain.getValorTotal() - transaccion.getValor());
-                    transaccionesDeBloque.remove(transaccion);
-                    bloqueBlockchain.setTransacciones(transaccionesDeBloque);
-                    System.out.println("Deshaciendo cambios en el bloque " + bloqueBlockchain);
+                        System.out.println("Deshaciendo cambios en el bloque " + bloqueBlockchain);
+                        bloqueBlockchain.setTamanioTotal(bloqueBlockchain.getTamanioTotal() - transaccion.getTamanio());
+                        bloqueBlockchain.setValorTotal(bloqueBlockchain.getValorTotal() - transaccion.getValor());
+                        transaccionesDeBloque.remove(transaccion);
+                        bloqueBlockchain.setTransacciones(transaccionesDeBloque);
+                    }
                 }
             }
         }
-
         Bloque nuevoBloque = new Bloque();
 
-        Transaccion transaccion2 = transacciones.get(i);
+        Transaccion transaccion2 = transacciones.get(indice);
+        System.out.println("Creando nuevo bloque para transacción: " + transaccion2);
         if (transaccionValidaEnBloque(blockchain, nuevoBloque, transaccion2, maxTamanioBloque, maxValorBloque, maxTransacciones)) {
             System.out.println("Creando nuevo bloque para transacción: " + transaccion2);
             List<Transaccion> transaccionesDeBloqueVacia = new ArrayList<>(nuevoBloque.getTransacciones());
@@ -84,16 +89,16 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
             nuevoBloque.setTransacciones(transaccionesDeBloqueVacia);
             blockchain.add(nuevoBloque);
 
-            backtrackingBlockchain(transacciones, i + 1, solucion, blockchain, maxTamanioBloque, maxValorBloque, maxTransacciones);
+            backtrackingBlockchain(transacciones, indice + 1, solucion, blockchain, maxTamanioBloque, maxValorBloque, maxTransacciones);
 
+            nuevoBloque.setTamanioTotal(nuevoBloque.getTamanioTotal() - transaccion2.getTamanio());
+            nuevoBloque.setValorTotal(nuevoBloque.getValorTotal() - transaccion2.getValor());
+            nuevoBloque.setTransacciones(new ArrayList<>());
             blockchain.remove(nuevoBloque);
             System.out.println("Deshaciendo bloque: " + nuevoBloque);
         }
 
     }
-
-
-}
 
     public static boolean transaccionValidaEnBloque(List<Bloque> BC,
                                                     Bloque B,
@@ -132,11 +137,6 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
             return false;
         }
 
-        if (((B.getValorTotal() + Tr.getValor()) % 10 ) != 0) {
-            System.out.println("Transacción inválida, el valor total no es múltiplo de 10");
-            return false;
-        }
-
         if (Tr.getDependencia() != null) {
             boolean encontrado = false;
             for (Bloque bloque : BC) {
@@ -160,5 +160,42 @@ public class AlgoritmoDeBlockchainImpl implements AlgoritmoDeBlockchain {
 
         System.out.println("Transacción válida");
         return true;
+    }
+
+    private List<Bloque> copiarBlockchain(List<Bloque> blockchain) {
+        List<Bloque> copia = new ArrayList<>();
+        for (Bloque bloque : blockchain) {
+            Bloque nuevoBloque = new Bloque();
+            nuevoBloque.setTamanioTotal(bloque.getTamanioTotal());
+            nuevoBloque.setValorTotal(bloque.getValorTotal());
+            List<Transaccion> transaccionesCopia = new ArrayList<>();
+            for (Transaccion transaccion : bloque.getTransacciones()) {
+                Transaccion transaccionCopia = new Transaccion(transaccion.getTamanio(),
+                                                                transaccion.getValor(),
+                                                                transaccion.getDependencia(),
+                                                                transaccion.getFirmasRequeridas() );
+                transaccionesCopia.add(transaccionCopia);
+            }
+            nuevoBloque.setTransacciones(transaccionesCopia);
+            copia.add(nuevoBloque);
+        }
+        return copia;
+    }
+
+    private boolean validarBlockchain(List<Bloque> blockchain, List<Transaccion> transacciones) {
+        boolean flag = true;
+        int contTransacciones = 0;
+        for (Bloque bloque : blockchain) {
+            if (bloque.getValorTotal() % 10 != 0) {
+                System.out.println("Blockchain no supera la prueba de trabajo");
+                flag = false;
+            }
+            contTransacciones += bloque.getTransacciones().size();
+        }
+        if (contTransacciones < transacciones.size()) {
+            System.out.println("Blockchain no posee tamaño correspondiente");
+            flag = false;
+        }
+        return flag;
     }
 }

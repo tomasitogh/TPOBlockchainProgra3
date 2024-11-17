@@ -10,7 +10,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args){
         AlgoritmoDeBlockchain algoritmoDeBlockchain = new AlgoritmoDeBlockchainImpl();
-        List<Transaccion> transacciones = TransaccionUtils.crearTransaccionesSimples(2, 10, 10, 0);
+        List<Transaccion> transacciones = TransaccionUtils.crearTransaccionesSimples(3, 10, 10, 0);
         uade.edu.progra3.TransaccionUtils.firmarTransacciones(transacciones);
 
         //Depurando las transacciones generadas
@@ -22,7 +22,7 @@ public class Main {
             System.out.println("    Firmas : " + transaccion.getFirmasRequeridas());
         }
 
-        List<List<Bloque>> soluciones = algoritmoDeBlockchain.construirBlockchain(transacciones, 100, 100, 8, 5);
+        List<List<Bloque>> soluciones = algoritmoDeBlockchain.construirBlockchain(transacciones, 100, 100, 3, 5);
 
 
         // Imprimir las soluciones encontradas
